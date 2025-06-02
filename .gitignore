@@ -26,17 +26,17 @@
 /frontend/*.sw?
 
 # ===== BACKEND (.gitignore dla /backend) =====
-/backend/target/
-/backend/.classpath
-/backend/.project
-/backend/.settings/
-/backend/.vscode/
-/backend/*.idea
-/backend/*.iml
-/backend/.env
-/backend/build/
-/backend/.apt_generated
-/backend/.factorypath
-/backend/.springBeans
-/backend/.sts4-cache
-/backend/.mvn/wrapper/maven-wrapper.jar
+/backendd/target/
+/backendd/.classpath
+/backendd/.project
+/backendd/.settings/
+/backendd/.vscode/
+/backendd/*.idea
+/backendd/*.iml
+/backendd/.env
+/backendd/build/
+/backendd/.apt_generated
+/backendd/.factorypath
+/backendd/.springBeans
+/backendd/.sts4-cache
+/backendd/.mvn/wrapper/maven-wrapper.jar
