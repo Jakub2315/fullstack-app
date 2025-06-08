@@ -45,16 +45,35 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Jakub2315_fullstack-app
-
-
   node_frontend:
-    name: Frontend - Node + Sonar Action
+    name: Frontend - Node + Sonar
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm install
+
+    - name: Build frontend (optional)
+      working-directory: ./frontend
+      run: npm run build
+
+    - name: Run SonarQube Scanner
+      uses: SonarSource/sonarqube-scan-action@v5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.projectKey=Jakub2315_fullstack-app-frontend
+          -Dsonar.sources=./frontend/src
+          -Dsonar.tests=./frontend/src
+          -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/__tests__/**
+          -Dsonar.javascript.lcov.reportPaths=./frontend/coverage/lcov.info
