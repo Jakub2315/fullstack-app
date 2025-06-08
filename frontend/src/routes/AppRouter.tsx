@@ -49,14 +49,14 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/groups/:groupId/members"
             element={
               <PrivateRoute>
-                <GroupMembersPage />
+                <GroupMembersPage/>
               </PrivateRoute>
             }
-          />
+          /> */}
           <Route path="/groups/:groupId/debts" element={<GroupDebtsPage />} />
           <Route path="/test" element={<TestApiComponent />} />
           <Route
