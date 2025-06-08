@@ -1,4 +1,5 @@
-name: SonarQube Build
+# name: SonarQube Build
+name: Build
 
 on:
   push:
@@ -8,72 +9,128 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  java_backend:
-    name: Backend - Maven + Sonar
+  build-and-analyze:
+    name: Build & Analyze Monorepo
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 21
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: 'zulu'
+          distribution: "zulu"
 
-      - name: Cache Sonar packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Maven packages
+      - name: Cache Maven
         uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build project
-        working-directory: ./backend
-        run: mvn clean compile
+      - name: Build backend
+        working-directory: backend/PASIR_Lubera_Jakub
+        run: mvn clean install -DskipTests
 
-      - name: Analyze with Sonar
-        working-directory: ./backend
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Cache SonarCloud
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Jakub2315_fullstack-app
-  node_frontend:
-    name: Frontend - Node + Sonar
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+# on:
+#   push:
+#     branches:
+#       - master
+#   pull_request:
+#     types: [opened, synchronize, reopened]
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+# jobs:
+#   java_backend:
+#     name: Backend - Maven + Sonar
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-    - name: Install dependencies
-      working-directory: ./frontend
-      run: npm install
+#       - name: Set up JDK 21
+#         uses: actions/setup-java@v4
+#         with:
+#           java-version: 21
+#           distribution: 'zulu'
 
-    - name: Build frontend (optional)
-      working-directory: ./frontend
-      run: npm run build
+#       - name: Cache Sonar packages
+#         uses: actions/cache@v4
+#         with:
+#           path: ~/.sonar/cache
+#           key: ${{ runner.os }}-sonar
+#           restore-keys: ${{ runner.os }}-sonar
 
-    - name: Run SonarQube Scanner
-      uses: SonarSource/sonarqube-scan-action@v5
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        args: >
-          -Dsonar.projectKey=Jakub2315_fullstack-app-frontend
-          -Dsonar.sources=./frontend/src
-          -Dsonar.tests=./frontend/src
-          -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/__tests__/**
-          -Dsonar.javascript.lcov.reportPaths=./frontend/coverage/lcov.info
+#       - name: Cache Maven packages
+#         uses: actions/cache@v4
+#         with:
+#           path: ~/.m2
+#           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#           restore-keys: ${{ runner.os }}-m2
+
+#       - name: Build project
+#         working-directory: ./backend
+#         run: mvn clean compile
+
+#       - name: Analyze with Sonar
+#         working-directory: ./backend
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#         run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Jakub2315_fullstack-app
+#   node_frontend:
+#     name: Frontend - Node + Sonar
+#     runs-on: windows-latest
+#     steps:
+#     - uses: actions/checkout@v4
+#       with:
+#         fetch-depth: 0
+
+#     - name: Set up Node.js
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '18'
+
+#     - name: Install dependencies
+#       working-directory: ./frontend
+#       run: npm install
+
+#     - name: Build frontend (optional)
+#       working-directory: ./frontend
+#       run: npm run build
+
+#     - name: Run SonarQube Scanner
+#       uses: SonarSource/sonarqube-scan-action@v5
+#       env:
+#         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#       with:
+#         args: >
+#           -Dsonar.projectKey=Jakub2315_fullstack-app-frontend
+#           -Dsonar.sources=./frontend/src
+#           -Dsonar.tests=./frontend/src
+#           -Dsonar.exclusions=**/*.test.js,**/*.spec.js,**/__tests__/**
+#           -Dsonar.javascript.lcov.reportPaths=./frontend/coverage/lcov.info
