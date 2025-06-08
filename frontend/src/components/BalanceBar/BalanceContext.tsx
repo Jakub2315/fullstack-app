@@ -9,7 +9,7 @@ interface Balance {
 
 interface BalanceContextType {
   balance: Balance | null;
-  refreshBalance: (days: number | null) => void;
+  refreshBalance: (days: number | null) => Promise<void>; // ✅
 }
 
 export const BalanceContext = createContext<BalanceContextType | undefined>(
